@@ -66,7 +66,7 @@ python3 AutoCastSim/parallel_scenario_runner.py  \
   --benchmark_config $CONFIG \
   --commlog  \
   --full \
-  --emualte \
+  --emulate \
   --hud \
   --passive_collider \
   --outputdir $OUTPUTDIR \
@@ -99,7 +99,7 @@ python3 AutoCastSim/parallel_scenario_runner.py  \
   --benchmark_config $CONFIG \
   --commlog  \
   --full \
-  --emualte \
+  --emulate \
   --hud \
   --passive_collider \
   --outputdir $OUTPUTDIR \
@@ -133,7 +133,7 @@ python3 AutoCastSim/parallel_scenario_runner.py  \
   --passive_collider \
   --benchmark_config $CONFIG \
   --commlog  \
-  --emualte \
+  --emulate \
   --hud \
   --outputdir $OUTPUTDIR \
   --resample-config 'fixed' \
@@ -245,7 +245,7 @@ python3 parallel_evaluation.py  \
   --num-workers $CARLA_WORKERS \
   --file \
   --sharing \
-  --emualte \
+  --emulate \
   --hud \
   --benchmark_config $CONFIG \
   --num_checkpoint $CHECKPOINTITER \
