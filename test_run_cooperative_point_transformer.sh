@@ -54,6 +54,8 @@ kill -9 $(pgrep mosquitto)
 ./scripts/launch_carla.sh 0 ${CARLA_WORKERS} 2001 &
 sleep 2
 
+echo -n "launch_carla.sh finished, data-train"
+
 python3 AutoCastSim/parallel_scenario_runner.py  \
   --agent $AGENT \
   --reloadWorld  \
@@ -86,6 +88,8 @@ kill -9 $(pgrep ray)
 kill -9 $(pgrep mosquitto)
 ./scripts/launch_carla.sh 0 ${CARLA_WORKERS} 2001 &
 sleep 2
+
+echo -n "launch_carla.sh finished, data-val"
 
 python3 AutoCastSim/parallel_scenario_runner.py  \
   --agent $AGENT \
@@ -121,6 +125,8 @@ kill -9 $(pgrep mosquitto)
 ./scripts/launch_carla.sh ${CUDA_VISIBLE_DEVICES} ${CARLA_WORKERS} 2001 &
 sleep 2
 
+echo -n "launch_carla.sh finished, data-expert"
+
 python3 AutoCastSim/parallel_scenario_runner.py  \
   --agent $AGENT \
   --reloadWorld  \
@@ -138,6 +144,8 @@ python3 AutoCastSim/parallel_scenario_runner.py  \
   --outputdir $OUTPUTDIR \
   --resample-config 'fixed' \
   --seed $SEED 
+
+
 fi
 
 if [[ $MODE == bc ]]
