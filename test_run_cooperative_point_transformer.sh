@@ -179,7 +179,7 @@ kill $(pgrep CarlaUE4)
 kill $(pgrep ray)  
 kill $(pgrep mosquitto)
 
-python3 -m training.train_dagger_point_transformer_distributed \
+python3 -m training.train_dagger_point_transformers_distributed \
   --num-epochs 106 \
   --data $DATAFOLDER/Train/ \
   --daggerdata $DATAFOLDER/Dagger/ \
