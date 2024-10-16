@@ -56,7 +56,7 @@ sleep 2
 
 echo -n "launch_carla.sh finished, data-train"
 
-python3 AutoCastSim/parallel_scenario_runner.py  \
+python3 AutoCastSim/parallel_scenario_runner_distributed.py  \
   --agent $AGENT \
   --reloadWorld  \
   --port 2001 \
@@ -91,7 +91,7 @@ sleep 2
 
 echo -n "launch_carla.sh finished, data-val"
 
-python3 AutoCastSim/parallel_scenario_runner.py  \
+python3 AutoCastSim/parallel_scenario_runner_distributed.py  \
   --agent $AGENT \
   --reloadWorld  \
   --port 2001 \
@@ -127,7 +127,7 @@ sleep 2
 
 echo -n "launch_carla.sh finished, data-expert"
 
-python3 AutoCastSim/parallel_scenario_runner.py  \
+python3 AutoCastSim/parallel_scenario_runner_distributed.py  \
   --agent $AGENT \
   --reloadWorld  \
   --port 2001 \
