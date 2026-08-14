@@ -40,7 +40,7 @@ then
   BGTRAFFIC=30
 fi
 
-TrainValFolder=~/Documents/AutoCast_${SCEN}
+TrainValFolder=/home/janice/ScenarioRunner/latency_performance/AutoCast_6
 DATAFOLDER=$TrainValFolder
 
 if [[ $MODE == data-train ]]

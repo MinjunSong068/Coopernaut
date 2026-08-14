@@ -257,15 +257,17 @@ class LidarPointTransformerAgent(AutonomousAgent):
                         print("SUCCESSFULLY LOADED", other_agent_id, sum(lidar))
                         speed = other_actors[other_agent_id]['velocity']/30.0
                         self.other_states[key]['speed'] = speed
-                        print("sharing vehicles", ego_id, other_agent_id)
+                        num_valid_neighbors += 1
+                        print("sharing vehicles", ego_id, other_agent_id, "frame", frame_id)
                     else:
                         self.other_states[key]['lidar'] = np.zeros((self.npoints,3))
-                        self.other_states[key]['transform'] = np.eye(4) 
+                        self.other_states[key]['transform'] = np.eye(4)
                         self.other_states[key]['speed'] = 0.0
                     other_lidar.append(list(self.other_states[key]['lidar']))
                     other_speed.append(self.other_states[key]['speed'])
                     other_transform.append(self.other_states[key]['transform'])
-                
+                print("Frame collaborator count", frame_id, num_valid_neighbors)
+
                 if self.earlyfusion:
                     other_lidar_merge = []
                     for o_l in other_lidar:

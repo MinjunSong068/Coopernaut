@@ -3,5 +3,5 @@
 	url = git@github.com:hangqiu/AutoCast_Scenes.git
 [submodule "AutoCastSim"]
 	path = AutoCastSim
-	url = git@github.com:hangqiu/AutoCastSim.git
+	url = git@github.com:janguyen86/AutoCastSim.git
 	branch = master

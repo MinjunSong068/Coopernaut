@@ -1,0 +1,77 @@
+version: "3.8"
+ 
+# Two-container setup, matching how CARLA is normally run in Docker:
+#
+#   carla-server  -- the official carlasim/carla:0.9.15 image, does the
+#                     actual Unreal Engine simulation/rendering
+#   coopernaut    -- this repo's training container, connects to
+#                     carla-server over the network as an RPC client
+#
+# IMPORTANT: versions must match. Coopernaut/AutoCastSim was originally built
+# against CARLA 0.9.11, but this setup targets 0.9.15: the coopernaut image
+# is built with --build-arg CARLA_VERSION=0.9.15 (see build.args below),
+# which extracts the matching 0.9.15 Python client egg from this same
+# carla-server image at build time. Keep both in sync if you change either.
+# Mismatched client/server versions are a common source of hard-to-debug
+# RPC/connection errors -- see README for details.
+#
+# Usage:
+#   COOPERNAUT_DIR=~/dev/Coopernaut AUTOCASTSIM_DIR=~/dev/Coopernaut/AutoCastSim \
+#       docker compose up -d carla-server
+#   docker compose run --rm coopernaut
+#
+# Inside the coopernaut container, CARLA is reachable at host "carla-server",
+# port 2000 (not "localhost" -- that's a separate container). See README for
+# how to point Coopernaut's pipeline scripts / scenario_runner.py at it.
+ 
+services:
+  carla-server:
+    image: carlasim/carla:0.9.15
+    command: ["/bin/bash", "CarlaUE4.sh", "-RenderOffScreen", "-nosound", "-carla-rpc-port=2000"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "2000-2002:2000-2002"
+    shm_size: "4gb"
+ 
+  coopernaut:
+    build:
+      context: .
+      args:
+        CARLA_VERSION: "0.9.15"
+    image: coopernaut:latest
+    shm_size: "8gb"
+    depends_on:
+      - carla-server
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - COOPERNAUT_DIR=${COOPERNAUT_DIR:-./Coopernaut}
+      - AUTOCASTSIM_DIR=${AUTOCASTSIM_DIR:-./Coopernaut/AutoCastSim}
+      # CARLA server host/port as seen from inside this container. The
+      # hostname "carla-server" resolves via Docker's internal DNS to the
+      # service above -- do NOT use "localhost" here.
+      - CARLA_HOST=carla-server
+      - CARLA_PORT=2000
+    volumes:
+      # Your local Coopernaut repo -> live inside the container
+      - ${COOPERNAUT_DIR:-./Coopernaut}:/workspace/Coopernaut
+      # Your local AutoCastSim repo -> mounted over the submodule path so you
+      # can edit scenario_runner.py etc. directly and see it live-reload
+      - ${AUTOCASTSIM_DIR:-./Coopernaut/AutoCastSim}:/workspace/Coopernaut/AutoCastSim
+      # Data / results / checkpoints persisted on host
+      - ./data:/workspace/Coopernaut/data
+      - ./result:/workspace/Coopernaut/result
+      - ./ckpts:/workspace/Coopernaut/ckpts
+    stdin_open: true
+    tty: true
