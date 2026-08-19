@@ -69,9 +69,8 @@ services:
       # Your local AutoCastSim repo -> mounted over the submodule path so you
       # can edit scenario_runner.py etc. directly and see it live-reload
       - ${AUTOCASTSIM_DIR:-./Coopernaut/AutoCastSim}:/workspace/Coopernaut/AutoCastSim
-      # Data / results / checkpoints persisted on host
-      - ./data:/workspace/Coopernaut/data
-      - ./result:/workspace/Coopernaut/result
-      - ./ckpts:/workspace/Coopernaut/ckpts
+      - ${COOPERNAUT_DIR:-./Coopernaut}/data:/workspace/Coopernaut/data
+      - ${COOPERNAUT_DIR:-./Coopernaut}/result:/workspace/Coopernaut/result
+      - ${COOPERNAUT_DIR:-./Coopernaut}/ckpts:/workspace/Coopernaut/ckpts
     stdin_open: true
     tty: true

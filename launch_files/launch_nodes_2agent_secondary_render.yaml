@@ -1,0 +1,174 @@
+x-host: &host "192.168.88.88"
+x-route: &route "srunner/examples_dagger_agent/DistributedMultiEgoVehicle_red_light.xml"
+x-latency: &latency_folder_path "latency_performance/coopernaut_swarm_2agent_secondary_render/2machines"
+x-repo-volume: &repo_volume "/home/janice/ScenarioRunner:/home/carla/ScenarioRunner"
+x-dev-volume: &dev_volume "/dev:/dev"
+
+save_logs: false
+
+nodes:
+  primary_server_node:
+    hostname: r15servera.engr.ucr.edu
+    image: cisl/carla-patched:swarm
+    command:
+      [
+        "/bin/bash",
+        "-c",
+        "./CarlaUE4.sh \
+        -RenderOffScreen \
+        -nullrhi \
+        -nosound \
+        -stdout \
+        -log \
+        -carla-rpc-port=2000 \
+        -carla-streaming-port=2001 \
+        -carla-primary-port=2002"
+      ]
+    env:
+      DISPLAY: ":0"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "all,graphics,utility,compute"
+    network: host
+
+  secondary_server_nodes:
+    - hostname: cislalpha.engr.ucr.edu
+      host: 192.168.88.86
+      rpc_port: 3000
+      image: cisl/carla-patched:swarm
+      command:
+        [
+          "/bin/bash",
+          "-c",
+          "./CarlaUE4.sh \
+          -RenderOffScreen \
+          -nosound \
+          -stdout \
+          -log \
+          -carla-rpc-port=3000 \
+          -carla-streaming-port=3001 \
+          -carla-primary-host=$PRIMARY_HOST \
+          -carla-primary-port=2002 \
+          -secondary-id=0 \
+          -ini:[/Script/Engine.RendererSettings]:r.GraphicsAdapter=0"
+        ]
+      env:
+        DISPLAY: ":0"
+        NVIDIA_VISIBLE_DEVICES: "all"
+        NVIDIA_DRIVER_CAPABILITIES: "all,graphics,utility,compute"
+        PRIMARY_HOST: *host
+      network: host
+
+    - hostname: cislomega.engr.ucr.edu
+      host: 192.168.88.87
+      rpc_port: 3000
+      image: cisl/carla-patched:swarm
+      command:
+        [
+          "/bin/bash",
+          "-c",
+          "./CarlaUE4.sh \
+          -RenderOffScreen \
+          -nosound \
+          -stdout \
+          -log \
+          -carla-rpc-port=3000 \
+          -carla-streaming-port=3001 \
+          -carla-primary-host=$PRIMARY_HOST \
+          -carla-primary-port=2002 \
+          -secondary-id=1 \
+          -ini:[/Script/Engine.RendererSettings]:r.GraphicsAdapter=0"
+        ]
+      env:
+        DISPLAY: ":0"
+        NVIDIA_VISIBLE_DEVICES: "all"
+        NVIDIA_DRIVER_CAPABILITIES: "all,graphics,utility,compute"
+        PRIMARY_HOST: *host
+      network: host
+
+  scenario_runner:
+    hostname: r15servera.engr.ucr.edu
+    image: cisl/coopernaut:latest
+    command:
+      - "bash"
+      - "-c"
+      - |
+        echo carla | sudo -S mkdir -p "$LATENCY_PATH"
+        echo carla | sudo -S chmod 777 "/home/carla/ScenarioRunner/$LATENCY_PATH"
+        python3.10 -u scenario_runner_distributed.py \
+          --host "$PRIMARY_HOST" \
+          --sync \
+          --ScenarioRunnerIP "$PRIMARY_HOST" \
+          --route "$ROUTE" \
+          --latency_folder_path "$LATENCY_PATH"
+    env:
+      LATENCY_PATH: *latency_folder_path
+      ROUTE: *route
+      PRIMARY_HOST: *host
+      DISPLAY: ":0"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "all,compute"
+    network: host
+    volumes:
+      - *repo_volume
+      - *dev_volume
+    cap_add:
+      - "ALL"
+
+  agents:
+    - hostname: cislalpha.engr.ucr.edu
+      image: cisl/coopernaut:latest
+      command:
+        - "bash"
+        - "-c"
+        - |
+          echo carla | sudo -S mkdir -p "$LATENCY_PATH"
+          echo carla | sudo -S chmod 777 "$LATENCY_PATH"
+          python3.10 -u agent_wrapper_main.py \
+            --host "$PRIMARY_HOST" \
+            --ScenarioRunnerIP "$PRIMARY_HOST" \
+            --route "$ROUTE" \
+            --route_id "0" \
+            --secondary_id "0" \
+            --latency_folder_path "$LATENCY_PATH"
+      env:
+        LATENCY_PATH: *latency_folder_path
+        ROUTE: *route
+        PRIMARY_HOST: *host
+        DISPLAY: ":0"
+        NVIDIA_VISIBLE_DEVICES: "all"
+        NVIDIA_DRIVER_CAPABILITIES: "all,compute"
+      network: host
+      volumes:
+        - *repo_volume
+        - *dev_volume
+      cap_add:
+        - "ALL"
+
+    - hostname: cislomega.engr.ucr.edu
+      image: cisl/coopernaut:latest
+      command:
+        - "bash"
+        - "-c"
+        - |
+          echo carla | sudo -S mkdir -p "$LATENCY_PATH"
+          echo carla | sudo -S chmod 777 "$LATENCY_PATH"
+          python3.10 -u agent_wrapper_main.py \
+            --host "$PRIMARY_HOST" \
+            --ScenarioRunnerIP "$PRIMARY_HOST" \
+            --route "$ROUTE" \
+            --route_id "1" \
+            --secondary_id "1" \
+            --latency_folder_path "$LATENCY_PATH"
+      env:
+        LATENCY_PATH: *latency_folder_path
+        ROUTE: *route
+        PRIMARY_HOST: *host
+        DISPLAY: ":0"
+        NVIDIA_VISIBLE_DEVICES: "all"
+        NVIDIA_DRIVER_CAPABILITIES: "all,compute"
+      network: host
+      volumes:
+        - *repo_volume
+        - *dev_volume
+      cap_add:
+        - "ALL"

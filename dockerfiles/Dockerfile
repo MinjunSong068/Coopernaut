@@ -155,9 +155,10 @@ RUN pip install --no-cache-dir \
         scikit-image \
         scikit-learn \
         opencv-python \
-        h5py \
-        open3d-cpu 
- 
+        h5py
+
+RUN pip install --no-cache-dir open3d==0.13.0 tensorboard
+
 # -----------------------------------------------------------------------------
 # CARLA Python client -- copied from the official carlasim/carla server image
 # (see the carla_pyapi stage above), NOT pip/PyPI (no wheel exists there for
@@ -187,10 +188,11 @@ RUN python -c "import carla; print('carla client OK:', carla.__file__)" && \
  
 # -----------------------------------------------------------------------------
 # PyTorch Geometric stack (needs to match torch 1.7.1 + cu110 wheel index)
+
 # -----------------------------------------------------------------------------
 RUN pip install --no-cache-dir torch-scatter==2.0.5 \
         -f https://data.pyg.org/whl/torch-1.7.1+cu110.html && \
-    pip install --no-cache-dir torch-sparse==0.6.10 \
+    pip install --no-cache-dir torch-sparse==0.6.9 \
         -f https://data.pyg.org/whl/torch-1.7.1+cu110.html && \
     pip install --no-cache-dir torch-geometric==1.7.2
  
